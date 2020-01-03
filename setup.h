@@ -11,10 +11,11 @@
 
 enum msgIds_e {
 	// TX
-	eMsgId_reportStatus   = 0x18000000,
+	eMsgId_reportStatus   = 0x18000011,
 
 	// RX
 	eMsgId_forceState     = 0x18000001,
+	eMsgId_forceReboot    = 0x18000002,
 	eMsgId_batteryTempMsg = 0x0554,
 //	eWakeBusMsg     = 0x423,
 };

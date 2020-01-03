@@ -17,17 +17,7 @@
 
 
 void can_parse_msgs(can_t *msg);
-
-
-
-void emergencyOff(void) {
-	// software detected a serious problem
-	// make sure the heater stays off and
-	// never turns back on!
-	bw_outputSet(eOut_relais1, eOut_off);
-	bw_outputSet(eOut_relais2, eOut_off);
-}
-
+void emergencyOff(void);
 
 
 
@@ -84,6 +74,12 @@ int main(void) {
 					if(eState_cooling == msgRx.data[0]) {
 						state = eState_cooling;
 					}
+					break;
+				}
+
+				case eMsgId_forceReboot: {
+					emergencyOff();
+					while(1);
 					break;
 				}
 
@@ -208,4 +204,14 @@ void can_wakeBus( void ) {
 
 	can_send_message( &msg );
 #endif
+}
+
+
+
+void emergencyOff(void) {
+	// software detected a serious problem
+	// make sure the heater stays off and
+	// never turns back on!
+	bw_outputSet(eOut_relais1, eOut_off);
+	bw_outputSet(eOut_relais2, eOut_off);
 }
