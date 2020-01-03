@@ -1,0 +1,15 @@
+# editor backup files
+*.swp
+*.save
+
+# compililation products
+*.o
+*.hex
+*.elf
+*.bin
+
+# can library
+can/.dep
+can/build
+can/libcan.a
+
