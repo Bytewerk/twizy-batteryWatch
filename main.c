@@ -182,7 +182,7 @@ int main(void) {
 		msgTx.data[5] = heaterAdcRaw & 0xFF;
 
 		msgTx.data[6] = minBatteryTemp;
-		msgTx.data[7] = maxBatteryTemp;
+		msgTx.data[7] = state;
 //		msgTx.data[] = canMsgTxCounter++;
 
 		if(timeStatusMsg < now) {
