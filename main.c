@@ -29,11 +29,12 @@ int main(void) {
 	// The target temperature for the battery is 20 degrees however the outer shell
 	// is not conducting heat very efficiently. Therefore a temperature of 60 degrees
 	// on the outer shell is acceptable when the battery itself is cold
-	uint32_t now;
-	uint16_t heaterAdcRaw = 0;
-	uint8_t  inRange = FALSE;
-	uint8_t  state=0;
-	uint8_t  relaisState=0;
+	uint32_t now            = 0;
+	uint32_t timeStatusMsg  = 0;
+	uint16_t heaterAdcRaw   = 0;
+	uint8_t  inRange        = FALSE;
+	uint8_t  state          = 0;
+	uint8_t  relaisState    = 0;
 	uint8_t  maxBatteryTemp = 0;
 	uint8_t  minBatteryTemp = 0;
 	can_t msgRx;
@@ -184,7 +185,10 @@ int main(void) {
 		msgTx.data[7] = maxBatteryTemp;
 //		msgTx.data[] = canMsgTxCounter++;
 
-		can_send_message(&msgTx);
+		if(timeStatusMsg < now) {
+			timeStatusMsg = now + 1000;
+			can_send_message(&msgTx);
+		}
 		timer_wait(100);
 
 	} // while(1)
