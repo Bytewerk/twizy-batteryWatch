@@ -37,7 +37,7 @@ enum channels_e {
 };
 
 enum temperatures_e {
-	eTempLowLimit    = 0x100,
+	eTempLowLimit    = 0x80,
 	eTempLowThresh   = 0x1D1, // 50c
 	eTempHighThresh  = 0x1FC, // 73c
 	eTempHighLimit   = 0x212, // 80c
