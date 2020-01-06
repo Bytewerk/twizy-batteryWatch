@@ -15,7 +15,7 @@ enum msgIds_e {
 
 	// RX
 	eMsgId_forceState     = 0x18000001,
-	eMsgId_forceReboot    = 0x18000002,
+	eMsgId_forceReboot    = 0x180000FF,
 	eMsgId_batteryTempMsg = 0x0554,
 //	eWakeBusMsg     = 0x423,
 };
