@@ -61,6 +61,15 @@ int main(void) {
 		inRange = adc_tempInRange(heaterAdcRaw);
 
 
+		if(now > 0x80000000) {
+			// force reboot when timestamps are getting too big
+			// this prevents overflow and related inconsistent
+			// behaviour.
+			emergencyOff();
+			while(1);
+		}
+
+
 		// get can messages
 		while(can_check_message()) {
 			can_get_message(&msgRx);
