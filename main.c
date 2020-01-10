@@ -27,13 +27,16 @@ int main(void) {
 	// There are 2 temperatures to consider. The temperature of the heating
 	// element and the internal temperature of the battery.
 	// The target temperature for the battery is 20 degrees however the outer shell
-	// is not conducting heat very efficiently. Therefore a temperature of 60 degrees
-	// on the outer shell is acceptable when the battery itself is cold
+	// is not conducting heat very efficiently. However heat transfer can be increased
+	// by raising the temperature of the heater above the target temperature of the battery.
+	// Temperatures of 60 degrees on the outer shell are acceptable.
 	uint32_t now            = 0;
 	uint32_t timeStatusMsg  = 0;
+	uint32_t timeHeaterStart= 0;
 	uint16_t heaterAdcRaw   = 0;
 	uint8_t  inRange        = FALSE;
-	uint8_t  state          = 0;
+	uint8_t  state          = eState_init;
+	uint8_t  lastState      = eState_init;
 	uint8_t  relaisState    = 0;
 	uint8_t  maxBatteryTemp = 0;
 	uint8_t  minBatteryTemp = 0;
@@ -117,7 +120,9 @@ int main(void) {
 			}
 
 			case eState_heating: {
-				// TODO: make sure temperature actually rises -> sensor ok
+				if(now > (timeHeaterStart + eTimeout_heaterUseage)) {
+					state = eState_emergencyOff; // heating phase too long
+				}
 
 				if(heaterAdcRaw > eTempHighThresh) {
 					state = eState_cooling;
@@ -157,6 +162,9 @@ int main(void) {
 
 			case eState_forceOn: // fall through
 			case eState_heating: {
+				if(lastState != state) {
+					timeHeaterStart = now;
+				}
 				bw_outputSet(eOut_relais1, eOut_on);
 				bw_outputSet(eOut_relais2, eOut_on);
 				bw_ledSet(eBlueLed, 1);
@@ -191,13 +199,16 @@ int main(void) {
 		msgTx.data[5] = heaterAdcRaw & 0xFF;
 
 		msgTx.data[6] = minBatteryTemp;
+//		msgTx.data[7] = maxBatteryTemp;
 		msgTx.data[7] = state;
 //		msgTx.data[] = canMsgTxCounter++;
 
 		if(timeStatusMsg < now) {
-			timeStatusMsg = now + 1000;
+			timeStatusMsg = now + eDelay_statusMsgCycle;
 			can_send_message(&msgTx);
 		}
+
+		lastState = state;
 		timer_wait(100);
 
 	} // while(1)
