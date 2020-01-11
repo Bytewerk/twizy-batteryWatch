@@ -11,14 +11,15 @@
 #include "adc.h"
 
 
-#define VERSION_MAJOR (0)
-#define VERSION_MINOR (1)
+#define VERSION_MAJOR (1)
+#define VERSION_MINOR (2)
 
 
 
 void can_parse_msgs(can_t *msg);
 void emergencyOff(void);
 void msgSendStatus(uint32_t now, uint16_t heaterAdcRaw, uint8_t state);
+void msgSendVersion(void);
 
 
 
@@ -33,6 +34,7 @@ int main(void) {
 	// Temperatures of 60 degrees on the outer shell are acceptable.
 	uint32_t now            = 0;
 	uint32_t timeStatusMsg  = 0;
+	uint32_t timeVersionMsg = 0;
 	uint32_t timeHeaterStart= 0;
 	uint16_t heaterAdcRaw   = 0;
 	uint8_t  inRange        = FALSE;
@@ -191,6 +193,11 @@ int main(void) {
 			msgSendStatus(now, heaterAdcRaw, state);
 		}
 
+		if(timeVersionMsg < now) {
+			timeVersionMsg = now + eDelay_versionMsgCycle;
+			msgSendVersion();
+		}
+
 		lastState = state;
 		timer_wait(100);
 
@@ -242,6 +249,19 @@ void msgSendStatus(uint32_t now, uint16_t heaterAdcRaw, uint8_t state) {
 			0x00,
 			state
 		}
+	};
+
+	can_send_message(&msg);
+}
+
+
+
+void msgSendVersion(void) {
+	can_t msg = {
+		.id = eMsgId_reportVersion,
+		.flags = { .rtr = 0, .extended = 1 },
+		.length = 2,
+		.data = { VERSION_MAJOR, VERSION_MINOR }
 	};
 
 	can_send_message(&msg);

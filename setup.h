@@ -11,10 +11,8 @@
 
 enum msgIds_e {
 	// TX
-	eMsgId_reportInputStatus = 0x18000011,
-	eMsgId_reportVersion     = 0x18000012,
-	eMsgId_reportState       = 0x18000013,
-	eMsgId_marker            = 0x18000020,
+	eMsgId_reportStatus   = 0x18000011,
+	eMsgId_reportVersion  = 0x18000012,
 
 	// RX
 	eMsgId_forceState     = 0x18000001,
@@ -24,12 +22,10 @@ enum msgIds_e {
 };
 
 
-
 enum timings_e {
-	eTimeout_heaterUseage      = 90000, // ms
-	eDelay_inputStatusMsgCycle = 1000,
-	eDelay_versionMsgCycle     = 10000,
-	eDelay_stateMsgCycle       = 10000,
+	eTimeout_heaterUseage = 90000, // ms
+	eDelay_statusMsgCycle = 1000,
+	eDelay_versionMsgCycle = 10000,
 };
 
 
@@ -56,14 +52,6 @@ enum temperatures_e {
 	eTempHighLimit   = 0x212, // 80c
 	eTempTarget      = 0x1DE, // 60c (estimation)
 };
-
-
-
-enum algoConstants_e {
-	eTempFilterIterations = 3,
-};
-
-
 
 enum states_e {
 	eState_init          = 0x00,
