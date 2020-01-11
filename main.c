@@ -18,6 +18,7 @@
 
 void can_parse_msgs(can_t *msg);
 void emergencyOff(void);
+void msgSendStatus(uint32_t now, uint16_t heaterAdcRaw, uint8_t state);
 
 
 
@@ -37,11 +38,9 @@ int main(void) {
 	uint8_t  inRange        = FALSE;
 	uint8_t  state          = eState_init;
 	uint8_t  lastState      = eState_init;
-	uint8_t  relaisState    = 0;
 	uint8_t  maxBatteryTemp = 0;
 	uint8_t  minBatteryTemp = 0;
 	can_t msgRx;
-	can_t msgTx;
 
 	timer_init();
 	adc_init();
@@ -187,25 +186,9 @@ int main(void) {
 		//  80k : 50 <-- 0x1D1(465)
 */
 
-		msgTx.id = eMsgId_reportStatus;
-		msgTx.flags.extended = 1;
-		msgTx.flags.rtr      = 0;
-		msgTx.length         = 8;
-		msgTx.data[0] = (now>>24) & 0xFF; // time since boot
-		msgTx.data[1] = (now>>16) & 0xFF; // in milliseconds
-		msgTx.data[2] = (now>> 8) & 0xFF; // in big endian
-		msgTx.data[3] = (now)     & 0xFF;
-		msgTx.data[4] = ((heaterAdcRaw>>8) & 0xFF); // state of relais | raw heater ADC
-		msgTx.data[5] = heaterAdcRaw & 0xFF;
-
-		msgTx.data[6] = minBatteryTemp;
-//		msgTx.data[7] = maxBatteryTemp;
-		msgTx.data[7] = state;
-//		msgTx.data[] = canMsgTxCounter++;
-
 		if(timeStatusMsg < now) {
 			timeStatusMsg = now + eDelay_statusMsgCycle;
-			can_send_message(&msgTx);
+			msgSendStatus(now, heaterAdcRaw, state);
 		}
 
 		lastState = state;
@@ -238,4 +221,28 @@ void emergencyOff(void) {
 	// never turns back on!
 	bw_outputSet(eOut_relais1, eOut_off);
 	bw_outputSet(eOut_relais2, eOut_off);
+}
+
+
+
+void msgSendStatus(uint32_t now, uint16_t heaterAdcRaw, uint8_t state) {
+	can_t msg = {
+		.id = eMsgId_reportStatus,
+		.flags = { .rtr = 0, .extended = 1 },
+		.length = 8,
+		.data = {
+			(now>>24) & 0xFF, // time since boot
+			(now>>16) & 0xFF, // in milliseconds
+			(now>> 8) & 0xFF, // in big endian
+			(now)     & 0xFF,
+
+			((heaterAdcRaw>>8) & 0xFF), // state of relais | raw heater ADC
+			msg.data[5] = heaterAdcRaw & 0xFF,
+
+			0x00,
+			state
+		}
+	};
+
+	can_send_message(&msg);
 }
