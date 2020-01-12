@@ -13,6 +13,7 @@ enum msgIds_e {
 	// TX
 	eMsgId_reportInputStatus = 0x18000011,
 	eMsgId_reportVersion     = 0x18000012,
+	eMsgId_reportState       = 0x18000013,
 
 	// RX
 	eMsgId_forceState     = 0x18000001,

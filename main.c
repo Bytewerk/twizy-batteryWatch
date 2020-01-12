@@ -12,13 +12,14 @@
 
 
 #define VERSION_MAJOR (1)
-#define VERSION_MINOR (3)
+#define VERSION_MINOR (4)
 
 
 
 void can_parse_msgs(can_t *msg);
 void emergencyOff(void);
 void msgSendInputStatus(uint32_t now, uint16_t heaterAdcRaw);
+void msgSendState(uint32_t now, uint8_t state, uint8_t lastState, uint8_t errorCode);
 void msgSendVersion(void);
 
 
@@ -149,6 +150,12 @@ int main(void) {
 			}
 		}
 
+
+		if(lastState != state) {
+			msgSendState(now, state, lastState, 0); // report state changes
+		}
+
+
 		// react on state
 		switch(state) {
 			default:             // fall through
@@ -246,6 +253,23 @@ void msgSendInputStatus(uint32_t now, uint16_t heaterAdcRaw) {
 			((heaterAdcRaw>>8) & 0xFF), // state of relais | raw heater ADC
 			msg.data[5] = heaterAdcRaw & 0xFF,
 
+		}
+	};
+
+	can_send_message(&msg);
+}
+
+
+
+void msgSendState(uint32_t now, uint8_t state, uint8_t lastState, uint8_t errorCode) {
+	can_t msg = {
+		.id = eMsgId_reportState,
+		.flags = { .rtr = 0, .extended = 1 },
+		.length = 3,
+		.data = {
+			state,
+			lastState,
+			errorCode
 		}
 	};
 
