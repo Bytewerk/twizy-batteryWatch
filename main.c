@@ -12,13 +12,13 @@
 
 
 #define VERSION_MAJOR (1)
-#define VERSION_MINOR (2)
+#define VERSION_MINOR (3)
 
 
 
 void can_parse_msgs(can_t *msg);
 void emergencyOff(void);
-void msgSendStatus(uint32_t now, uint16_t heaterAdcRaw, uint8_t state);
+void msgSendInputStatus(uint32_t now, uint16_t heaterAdcRaw);
 void msgSendVersion(void);
 
 
@@ -33,7 +33,7 @@ int main(void) {
 	// by raising the temperature of the heater above the target temperature of the battery.
 	// Temperatures of 60 degrees on the outer shell are acceptable.
 	uint32_t now            = 0;
-	uint32_t timeStatusMsg  = 0;
+	uint32_t timeInputStatusMsg = 0;
 	uint32_t timeVersionMsg = 0;
 	uint32_t timeHeaterStart= 0;
 	uint16_t heaterAdcRaw   = 0;
@@ -188,9 +188,9 @@ int main(void) {
 		//  80k : 50 <-- 0x1D1(465)
 */
 
-		if(timeStatusMsg < now) {
-			timeStatusMsg = now + eDelay_statusMsgCycle;
-			msgSendStatus(now, heaterAdcRaw, state);
+		if(timeInputStatusMsg < now) {
+			timeInputStatusMsg = now + eDelay_inputStatusMsgCycle;
+			msgSendInputStatus(now, heaterAdcRaw);
 		}
 
 		if(timeVersionMsg < now) {
@@ -232,11 +232,11 @@ void emergencyOff(void) {
 
 
 
-void msgSendStatus(uint32_t now, uint16_t heaterAdcRaw, uint8_t state) {
+void msgSendInputStatus(uint32_t now, uint16_t heaterAdcRaw) {
 	can_t msg = {
-		.id = eMsgId_reportStatus,
+		.id = eMsgId_reportInputStatus,
 		.flags = { .rtr = 0, .extended = 1 },
-		.length = 8,
+		.length = 6,
 		.data = {
 			(now>>24) & 0xFF, // time since boot
 			(now>>16) & 0xFF, // in milliseconds
@@ -246,8 +246,6 @@ void msgSendStatus(uint32_t now, uint16_t heaterAdcRaw, uint8_t state) {
 			((heaterAdcRaw>>8) & 0xFF), // state of relais | raw heater ADC
 			msg.data[5] = heaterAdcRaw & 0xFF,
 
-			0x00,
-			state
 		}
 	};
 

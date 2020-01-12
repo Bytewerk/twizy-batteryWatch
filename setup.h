@@ -11,8 +11,8 @@
 
 enum msgIds_e {
 	// TX
-	eMsgId_reportStatus   = 0x18000011,
-	eMsgId_reportVersion  = 0x18000012,
+	eMsgId_reportInputStatus = 0x18000011,
+	eMsgId_reportVersion     = 0x18000012,
 
 	// RX
 	eMsgId_forceState     = 0x18000001,
@@ -24,7 +24,7 @@ enum msgIds_e {
 
 enum timings_e {
 	eTimeout_heaterUseage = 90000, // ms
-	eDelay_statusMsgCycle = 1000,
+	eDelay_inputStatusMsgCycle = 1000,
 	eDelay_versionMsgCycle = 10000,
 };
 
