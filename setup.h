@@ -28,6 +28,7 @@ enum timings_e {
 	eTimeout_heaterUseage = 90000, // ms
 	eDelay_inputStatusMsgCycle = 1000,
 	eDelay_versionMsgCycle = 10000,
+	eDelay_stateMsgCycle       = 10000,
 };
 
 
