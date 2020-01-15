@@ -12,7 +12,7 @@
 
 
 #define VERSION_MAJOR (1)
-#define VERSION_MINOR (6)
+#define VERSION_MINOR (7)
 
 
 
@@ -63,10 +63,6 @@ int main(void) {
 
 		now = timer_getMs();
 
-		heaterAdcRaw = adc_read(eIn_heaterTemp);
-//		uint16_t heaterAdc = adc_value2Temp(heaterAdcRaw);
-		inRange = adc_tempInRange(heaterAdcRaw);
-
 
 		if(now > 0x80000000) {
 			// force reboot when timestamps are getting too big
@@ -105,6 +101,11 @@ int main(void) {
 				}
 			} // switch
 		} // while
+
+
+		heaterAdcRaw = adc_read(eIn_heaterTemp);
+//		uint16_t heaterAdc = adc_value2Temp(heaterAdcRaw);
+		inRange = adc_tempInRange(heaterAdcRaw);
 
 
 		if(TRUE != inRange) {
