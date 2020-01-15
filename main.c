@@ -12,7 +12,7 @@
 
 
 #define VERSION_MAJOR (1)
-#define VERSION_MINOR (4)
+#define VERSION_MINOR (5)
 
 
 
@@ -21,6 +21,7 @@ void emergencyOff(void);
 void msgSendInputStatus(uint32_t now, uint16_t heaterAdcRaw);
 void msgSendState(uint32_t now, uint8_t state, uint8_t lastState, uint8_t errorCode);
 void msgSendVersion(void);
+void msgMarker(uint8_t id);
 
 
 
@@ -284,6 +285,19 @@ void msgSendVersion(void) {
 		.flags = { .rtr = 0, .extended = 1 },
 		.length = 2,
 		.data = { VERSION_MAJOR, VERSION_MINOR }
+	};
+
+	can_send_message(&msg);
+}
+
+
+
+void msgMarker(uint8_t id) {
+	can_t msg = {
+		.id = eMsgId_marker,
+		.flags = { .rtr = 0, .extended = 1 },
+		.length = 1,
+		.data = { id }
 	};
 
 	can_send_message(&msg);

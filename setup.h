@@ -14,6 +14,7 @@ enum msgIds_e {
 	eMsgId_reportInputStatus = 0x18000011,
 	eMsgId_reportVersion     = 0x18000012,
 	eMsgId_reportState       = 0x18000013,
+	eMsgId_marker            = 0x18000020,
 
 	// RX
 	eMsgId_forceState     = 0x18000001,
