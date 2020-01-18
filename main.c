@@ -12,13 +12,13 @@
 
 
 #define VERSION_MAJOR (1)
-#define VERSION_MINOR (7)
+#define VERSION_MINOR (8)
 
 
 
 void can_parse_msgs(can_t *msg);
 void emergencyOff(void);
-void msgSendInputStatus(uint32_t now, uint16_t heaterAdcRaw);
+void msgSendInputStatus(uint32_t now, uint16_t temp);
 void msgSendState(uint8_t state, uint8_t lastState, uint8_t errorCode);
 void msgSendVersion(void);
 void msgMarker(uint8_t id);
@@ -40,6 +40,8 @@ int main(void) {
 	uint32_t timeVersionMsg = 0;
 	uint32_t timeHeaterStart= 0;
 	uint16_t heaterAdcRaw   = 0;
+	uint16_t tempFiltered   = 0;
+
 	uint8_t  inRange        = FALSE;
 	uint8_t  state          = eState_init;
 	uint8_t  lastState      = eState_init;
@@ -58,6 +60,8 @@ int main(void) {
 	bw_ledSet(eBlueLed,  0);
 	bw_ledSet(eGreenLed, 0);
 
+
+	tempFiltered = adc_read(eIn_heaterTemp); // get an acceptable start value
 	while( 1 ) {
 		wdt_reset();
 
@@ -105,7 +109,8 @@ int main(void) {
 
 		heaterAdcRaw = adc_read(eIn_heaterTemp);
 //		uint16_t heaterAdc = adc_value2Temp(heaterAdcRaw);
-		inRange = adc_tempInRange(heaterAdcRaw);
+		tempFiltered = ((tempFiltered * (eTempFilterIterations-1)) + heaterAdcRaw) / eTempFilterIterations;
+		inRange = adc_tempInRange(tempFiltered);
 
 
 		if(TRUE != inRange) {
@@ -118,7 +123,7 @@ int main(void) {
 		switch(state) {
 			case eState_init:    // fall through
 			case eState_cooling: {
-				if(heaterAdcRaw < eTempLowThresh) {
+				if(tempFiltered < eTempLowThresh) {
 					state = eState_heating;
 				}
 				break;
@@ -129,7 +134,7 @@ int main(void) {
 					state = eState_emergencyOff; // heating phase too long
 				}
 
-				if(heaterAdcRaw > eTempHighThresh) {
+				if(tempFiltered > eTempHighThresh) {
 					state = eState_cooling;
 				}
 				break;
@@ -200,7 +205,7 @@ int main(void) {
 
 		if(timeInputStatusMsg < now) {
 			timeInputStatusMsg = now + eDelay_inputStatusMsgCycle;
-			msgSendInputStatus(now, heaterAdcRaw);
+			msgSendInputStatus(now, tempFiltered);
 		}
 
 		if(timeVersionMsg < now) {
@@ -247,7 +252,7 @@ void emergencyOff(void) {
 
 
 
-void msgSendInputStatus(uint32_t now, uint16_t heaterAdcRaw) {
+void msgSendInputStatus(uint32_t now, uint16_t temp) {
 	can_t msg = {
 		.id = eMsgId_reportInputStatus,
 		.flags = { .rtr = 0, .extended = 1 },
@@ -258,8 +263,8 @@ void msgSendInputStatus(uint32_t now, uint16_t heaterAdcRaw) {
 			(now>> 8) & 0xFF, // in big endian
 			(now)     & 0xFF,
 
-			((heaterAdcRaw>>8) & 0xFF), // state of relais | raw heater ADC
-			msg.data[5] = heaterAdcRaw & 0xFF,
+			((temp>>8) & 0xFF), // state of relais | heater ADC
+			msg.data[5] = temp & 0xFF,
 
 		}
 	};

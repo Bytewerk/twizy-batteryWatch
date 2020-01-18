@@ -56,6 +56,14 @@ enum temperatures_e {
 	eTempTarget      = 0x1DE, // 60c (estimation)
 };
 
+
+
+enum algoConstants_e {
+	eTempFilterIterations = 3,
+};
+
+
+
 enum states_e {
 	eState_init          = 0x00,
 	eState_heating       = 0x11,
