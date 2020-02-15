@@ -29,6 +29,7 @@ enum timings_e {
 	eDelay_inputStatusMsgCycle = 1000,
 	eDelay_versionMsgCycle = 10000,
 	eDelay_stateMsgCycle       = 10000,
+	eDelay_alertDuty           = 100,
 };
 
 

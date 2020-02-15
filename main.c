@@ -12,7 +12,7 @@
 
 
 #define VERSION_MAJOR (1)
-#define VERSION_MINOR (8)
+#define VERSION_MINOR (9)
 
 
 
@@ -39,6 +39,7 @@ int main(void) {
 	uint32_t timeStateMsg   = 0;
 	uint32_t timeVersionMsg = 0;
 	uint32_t timeHeaterStart= 0;
+	uint32_t timeLedAlertDuty = 0;
 	uint16_t heaterAdcRaw   = 0;
 	uint16_t tempFiltered   = 0;
 
@@ -216,6 +217,11 @@ int main(void) {
 		if(timeStateMsg < now) {
 			timeStateMsg = now + eDelay_stateMsgCycle;
 			msgSendState(state, lastState, 0);
+		}
+
+		if((timeLedAlertDuty < now) && (eState_emergencyOff == state)) {
+			timeLedAlertDuty = now + eDelay_alertDuty;
+			bw_ledToggle(eBlueLed);
 		}
 
 		lastState = state;
